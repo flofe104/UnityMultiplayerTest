@@ -1,0 +1,11 @@
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.exe
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.deps.json
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.runtimeconfig.json
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.runtimeconfig.dev.json
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.dll
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\bin\Debug\netcoreapp3.1\GameServer.pdb
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\obj\Debug\netcoreapp3.1\GameServer.csprojAssemblyReference.cache
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\obj\Debug\netcoreapp3.1\GameServer.AssemblyInfoInputs.cache
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\obj\Debug\netcoreapp3.1\GameServer.AssemblyInfo.cs
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\obj\Debug\netcoreapp3.1\GameServer.dll
+I:\Datein\git\UnityMultiplayerTest\GameServer\GameServer\obj\Debug\netcoreapp3.1\GameServer.pdb
