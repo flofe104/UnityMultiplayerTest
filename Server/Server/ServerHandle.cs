@@ -6,12 +6,6 @@ namespace Server
 {
     class ServerHandle
     {
-        public static void UDPTESTRECIEVED(int _fromClient, Packet p)
-        {
-            string message = p.ReadString();
-
-            Console.WriteLine($"Recieved UDP message: {message}");
-        }
 
         public static void WelcomeRecieved(int _fromClient, Packet p)
         {
@@ -24,6 +18,8 @@ namespace Server
             {
                 Console.WriteLine($" Player \"{username}\" (ID:{_fromClient}) has assumed the wrong client ID ({clientIdCheck})!");
             }
+
+            Server.clients[_fromClient].SendIntoGame(username);
         }
 
     }

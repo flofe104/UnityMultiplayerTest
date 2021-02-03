@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Server
@@ -8,7 +10,9 @@ namespace Server
     public enum ServerPackets
     {
         welcome = 1,
-        udpTest
+        spawnPlayer,
+        playerPosition,
+        playerRotation
 
     }
 
@@ -16,7 +20,7 @@ namespace Server
     public enum ClientPackets
     {
         welcomeReceived = 1,
-        udpTestRecieved
+        playerMovement
     }
 
     public class Packet : IDisposable
@@ -160,7 +164,68 @@ namespace Server
             Write(_value.Length); // Add the length of the string to the packet
             buffer.AddRange(Encoding.ASCII.GetBytes(_value)); // Add the string itself
         }
+
+        ///// <summary>Adds a Vector3 to the packet.</summary>
+        ///// <param name="_value">The Vector3 to add.</param>
+        //public void Write(Vector3 _value)
+        //{
+        //    Write(_value.X);
+        //    Write(_value.Y);
+        //    Write(_value.Z);
+        //}
+
+        public void AddObject<T>(T value, Action<T, Packet> writer)
+        {
+            writer(value, this);
+        }
+
+        public void Write(object source)
+        {
+            Type type = source.GetType();
+
+            Write(source.GetType().FullName);
+            foreach (FieldInfo f in GetFieldsFromType(type, type, false))
+            {
+                if (f.FieldType == typeof(int))
+                {
+                    Write((int)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(float))
+                {
+                    Write((float)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(bool))
+                {
+                    Write((bool)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(short))
+                {
+                    Write((short)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(string))
+                {
+                    Write((string)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(long))
+                {
+                    Write((long)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(byte))
+                {
+                    Write((byte)f.GetValue(source));
+                }
+                else if (f.FieldType == typeof(byte[]))
+                {
+                    Write((byte[])f.GetValue(source));
+                }
+                else
+                {
+                    Write(f.GetValue(source));
+                }
+            }
+        }
         #endregion
+
 
         #region Read Data
         /// <summary>Reads a byte from the packet.</summary>
@@ -331,6 +396,77 @@ namespace Server
                 throw new Exception("Could not read value of type 'string'!");
             }
         }
+
+        private readonly Assembly UNITY_ASSEMBLY = typeof(UnityEngine.Vector3).Assembly;
+
+        public object ReadObject()
+        {
+            string s = ReadString();
+
+            Type type;
+
+            if (s.Contains("System.Numerics"))
+            {
+                s = s.Replace("System.Numerics", "UnityEngine");
+                type = Type.GetType(s + ", " + UNITY_ASSEMBLY.FullName);
+            }
+            else
+            {
+                type = Type.GetType(s);
+            }
+
+            return Read(type);
+        }
+
+        private object Read(Type type)
+        {
+            object result = Activator.CreateInstance(type);
+
+            //maybe sort field to not run into problems when they have different order
+            foreach (FieldInfo f in GetFieldsFromType(type, type, false))
+            {
+                object curr;
+                if (f.FieldType == typeof(int))
+                {
+                    curr = ReadInt();
+                }
+                else if (f.FieldType == typeof(float))
+                {
+                    curr = ReadFloat();
+                }
+                else if (f.FieldType == typeof(bool))
+                {
+                    curr = ReadBool();
+                }
+                else if (f.FieldType == typeof(short))
+                {
+                    curr = ReadShort();
+                }
+                else if (f.FieldType == typeof(string))
+                {
+                    curr = ReadString();
+                }
+                else if (f.FieldType == typeof(long))
+                {
+                    curr = ReadLong();
+                }
+                else if (f.FieldType == typeof(byte))
+                {
+                    curr = ReadByte();
+                }
+                else if (f.FieldType == typeof(byte[]))
+                {
+                    throw new NotImplementedException("Dont know how to handle this");
+                }
+                else
+                {
+                    curr = ReadObject();
+                }
+                f.SetValue(result, curr);
+            }
+            return result;
+        }
+
         #endregion
 
         private bool disposed = false;
@@ -354,6 +490,25 @@ namespace Server
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+
+        private static FieldInfo[] GetFieldsFromType(Type target, Type last, bool lastInclusive = true)
+        {
+            List<FieldInfo> fields = new List<FieldInfo>();
+
+            ///add all public and private fields of current type
+            fields.AddRange(target.GetFields((BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)));
+
+            ///add all private fields of parent types. Stops after type "BaseSaveableMonoBehaviour" 
+            Type parentType = target;
+            do
+            {
+                fields.AddRange(parentType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(f => !f.IsFamily));
+                parentType = parentType.BaseType;
+            } while (parentType != null && parentType != last && (lastInclusive || parentType.BaseType != last));
+
+            return fields.ToArray();
         }
     }
 }

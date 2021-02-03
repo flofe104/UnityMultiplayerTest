@@ -125,7 +125,7 @@ namespace Server
             packetHandlers = new Dictionary<int, PacketHandler>()
             {
                 { (int)ClientPackets.welcomeReceived, ServerHandle.WelcomeRecieved } ,
-                { (int)ClientPackets.udpTestRecieved, ServerHandle.UDPTESTRECIEVED }
+                { (int)ClientPackets.playerMovement, null }
                 
             };
             Console.WriteLine("Initialized packets.");

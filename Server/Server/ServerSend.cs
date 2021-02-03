@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServerData;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,14 +18,6 @@ namespace Server
             }
         }
 
-        public static void UDPTest(int toClient)
-        {
-            using(Packet p = new Packet((int)ServerPackets.udpTest))
-            {
-                p.Write("A test for udp");
-                SendUDPData(toClient, p);
-            }
-        }
 
         private static void SendUDPData(int toClient, Packet p)
         {
@@ -80,6 +73,15 @@ namespace Server
         {
             p.WriteLength();
             Server.clients[toClient].tcp.SendData(p);
+        }
+
+        public static void SpawnPlayer(int toClient, PlayerData player)
+        {
+            using (Packet p = new Packet((int)ServerPackets.spawnPlayer))
+            {
+                p.Write(player);
+                SendTCPData(toClient, p);
+            }
         }
     }
 }
