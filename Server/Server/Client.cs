@@ -11,11 +11,12 @@ namespace Server
         public static int dataBufferSize = 4096;
         public int id;
         public TCP tcp;
-
+        public UDP udp;
         public Client(int clientId)
         {
             id = clientId;
             tcp = new TCP(id);
+            udp = new UDP(id);
         }
 
         public class TCP
@@ -125,6 +126,42 @@ namespace Server
 
         }
 
+        public class UDP
+        {
+            public IPEndPoint endPoint;
+            private int id;
+
+            public UDP(int id)
+            {
+                this.id = id;
+            }
+
+            public void Connect(IPEndPoint endPoint)
+            {
+                this.endPoint = endPoint;
+                ServerSend.UDPTest(id);
+            }
+
+            public void SendData(Packet p)
+            {
+                Server.SendUDPData(endPoint, p);
+            }
+
+            public void HandleData(Packet p)
+            {
+                int packetLength = p.ReadInt();
+                byte[] packetBytes = p.ReadBytes(packetLength);
+
+                ThreadManager.ExecuteOnMainThread(() =>
+                {
+                    using(Packet p = new Packet(packetBytes))
+                    {
+                        int packetId = p.ReadInt();
+                        Server.packetHandlers[packetId](id, p);
+                    }
+                });
+            }
+        }
 
 
     }

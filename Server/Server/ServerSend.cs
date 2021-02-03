@@ -17,6 +17,44 @@ namespace Server
             }
         }
 
+        public static void UDPTest(int toClient)
+        {
+            using(Packet p = new Packet((int)ServerPackets.udpTest))
+            {
+                p.Write("A test for udp");
+                SendUDPData(toClient, p);
+            }
+        }
+
+        private static void SendUDPData(int toClient, Packet p)
+        {
+            p.WriteLength();
+            Server.clients[toClient].udp.SendData(p);
+        }
+
+
+        private static void SendUDPDataToAll(Packet p)
+        {
+            p.WriteLength();
+            for (int i = 1; i < Server.MaxPlayers; i++)
+            {
+                Server.clients[i].udp.SendData(p);
+            }
+        }
+
+        private static void SendUDPDataToAllExcept(int id, Packet p)
+        {
+            p.WriteLength();
+            for (int i = 1; i < Server.MaxPlayers; i++)
+            {
+                if (Server.clients[i].id != id)
+                {
+                    Server.clients[i].udp.SendData(p);
+                }
+            }
+        }
+
+
         private static void SendTCPDataToAll(Packet p)
         {
             p.WriteLength();

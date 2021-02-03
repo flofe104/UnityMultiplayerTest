@@ -16,6 +16,7 @@ public class Client : MonoBehaviour
     public int port = 24680;
     public int myId = 0;
     public TCP tcp;
+    public UDP udp;
 
     private delegate void PacketHandler(Packet p);
     private static Dictionary<int, PacketHandler> packetHandlers;
@@ -36,6 +37,7 @@ public class Client : MonoBehaviour
     private void Start()
     {
         tcp = new TCP();
+        udp = new UDP();
     }
 
     public void ConnectToServer()
@@ -48,7 +50,9 @@ public class Client : MonoBehaviour
     {
         packetHandlers = new Dictionary<int, PacketHandler>()
         {
-            {(int)ServerPackets.welcome, ClientHandle.Welcome }
+            {(int)ServerPackets.welcome, ClientHandle.Welcome},
+                 {(int)ServerPackets.udpTest, ClientHandle.UdpTest }
+
         };
         Debug.Log("Initialized packets.");
     }
@@ -113,16 +117,16 @@ public class Client : MonoBehaviour
         {
             int packetLength = 0;
             recievedData.SetBytes(data);
-            if(recievedData.UnreadLength() >= 4)
+            if (recievedData.UnreadLength() >= 4)
             {
                 packetLength = recievedData.ReadInt();
-                if(packetLength <= 0)
+                if (packetLength <= 0)
                 {
                     return true;
                 }
             }
 
-            while(packetLength > 0 && packetLength <= recievedData.UnreadLength())
+            while (packetLength > 0 && packetLength <= recievedData.UnreadLength())
             {
                 byte[] packetBytes = recievedData.ReadBytes(packetLength);
                 ThreadManager.ExecuteOnMainThread(() =>
@@ -152,7 +156,7 @@ public class Client : MonoBehaviour
         {
             try
             {
-                if(socket != null)
+                if (socket != null)
                 {
                     stream.BeginWrite(p.ToArray(), 0, p.Length(), null, null);
                 }
@@ -168,6 +172,75 @@ public class Client : MonoBehaviour
     {
         public UdpClient socket;
         public IPEndPoint endPoint;
+
+        public UDP()
+        {
+            endPoint = new IPEndPoint(IPAddress.Parse(instance.ip), instance.port);
+        }
+
+        public void Connect(int localPort)
+        {
+            socket = new UdpClient(localPort);
+            socket.Connect(endPoint);
+            socket.BeginReceive(RecieveCallBack, null);
+
+            using (Packet p = new Packet())
+            {
+                SendData(p);
+            }
+        }
+
+        public void SendData(Packet p)
+        {
+            try
+            {
+                p.InsertInt(instance.myId);
+                if (socket != null)
+                {
+                    socket.BeginSend(p.ToArray(), p.Length(), null, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending data to server via UDP: {ex}");
+            }
+        }
+
+        private void RecieveCallBack(IAsyncResult ar)
+        {
+            try
+            {
+                byte[] data = socket.EndReceive(ar, ref endPoint);
+                socket.BeginReceive(RecieveCallBack, null);
+
+                if (data.Length >= 4)
+                {
+                    HandleData(data);
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void HandleData(byte[] data)
+        {
+            using (Packet p = new Packet(data))
+            {
+                int packetLength = p.ReadInt();
+                data = p.ReadBytes(packetLength);
+            };
+            ThreadManager.ExecuteOnMainThread(() =>
+            {
+                using (Packet p = new Packet(data))
+                {
+                    int packetId = p.ReadInt();
+                    packetHandlers[packetId](p);
+                };
+            });
+        }
     }
 
 }

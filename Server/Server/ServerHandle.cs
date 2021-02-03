@@ -6,6 +6,12 @@ namespace Server
 {
     class ServerHandle
     {
+        public static void UDPTESTRECIEVED(int _fromClient, Packet p)
+        {
+            string message = p.ReadString();
+
+            Console.WriteLine($"Recieved UDP message: {message}");
+        }
 
         public static void WelcomeRecieved(int _fromClient, Packet p)
         {
