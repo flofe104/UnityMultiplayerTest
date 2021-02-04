@@ -1,5 +1,6 @@
 ﻿using Server;
 using ServerData;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -28,4 +29,17 @@ public class ClientHandle : MonoBehaviour
         GameManager.instance.SpawnPlayer(data);
     }
 
+    public static void PlayerPosition(Packet p)
+    {
+        int id = p.ReadInt();
+        Vector3 pos = p.ReadObject<Vector3>();
+        GameManager.players[id].transform.position = pos;
+    }
+
+    public static void PlayerRotation(Packet p)
+    {
+        int id = p.ReadInt();
+        Quaternion rot = p.ReadObject<Quaternion>();
+        GameManager.players[id].transform.rotation = rot;
+    }
 }

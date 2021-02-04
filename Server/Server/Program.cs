@@ -6,9 +6,6 @@ namespace Server
     class Program
     {
 
-        public const int TICKS_PER_SEC = 30;
-        public const int MS_PER_TICK = 1000 / TICKS_PER_SEC;
-
         private static bool isRunning = false;
 
         static void Main(string[] args)
@@ -24,7 +21,7 @@ namespace Server
 
         private static void MainThread()
         {
-            Console.WriteLine($"Main thread started. Running at {TICKS_PER_SEC} ricks per second");
+            Console.WriteLine($"Main thread started. Running at {Constants.TICKS_PER_SEC} ricks per second");
             DateTime _nextLoop = DateTime.Now;
 
             while (isRunning)
@@ -33,7 +30,7 @@ namespace Server
                 {
                     GameLogic.Update();
 
-                    _nextLoop = _nextLoop.AddMilliseconds(MS_PER_TICK);
+                    _nextLoop = _nextLoop.AddMilliseconds(Constants.MS_PER_TICK);
 
                     if(_nextLoop > DateTime.Now)
                     {

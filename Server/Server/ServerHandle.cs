@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServerData;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -22,5 +23,10 @@ namespace Server
             Server.clients[_fromClient].SendIntoGame(username);
         }
 
+        public static void HandlePlayerInput(int fromClient, Packet p)
+        {
+            InputData data = p.ReadObject<InputData>();
+            Server.clients[fromClient].player.SetInput(data);
+        }
     }
 }

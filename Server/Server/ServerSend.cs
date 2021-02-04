@@ -47,6 +47,25 @@ namespace Server
             }
         }
 
+        public static void PlayerRotation(PlayerData playerData)
+        {
+            using (Packet p = new Packet((int)ServerPackets.playerRotation))
+            {
+                p.Write(playerData.id);
+                p.Write(playerData.rotation);
+                SendUDPDataToAllExcept(playerData.id, p);
+            }
+        }
+
+        public static void PlayerPosition(PlayerData playerData)
+        {
+            using (Packet p = new Packet((int)ServerPackets.playerPosition))
+            {
+                p.Write(playerData.id);
+                p.Write(playerData.position);
+                SendUDPDataToAll(p);
+            }
+        }
 
         private static void SendTCPDataToAll(Packet p)
         {

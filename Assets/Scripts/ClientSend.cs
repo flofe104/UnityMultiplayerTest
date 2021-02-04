@@ -1,4 +1,5 @@
 ﻿using Server;
+using ServerData;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,15 @@ public class ClientSend
     {
         p.WriteLength();
         Client.instance.udp.SendData(p);
+    }
+
+    public static void SendPlayerInput(InputData inputData)
+    {
+        using (Packet p = new Packet((int)ClientPackets.playerMovement))
+        {
+            p.Write(inputData);
+            SendUDPData(p);
+        }  
     }
 
     public static void WelcomeReceived()

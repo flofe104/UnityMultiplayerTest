@@ -10,9 +10,9 @@ namespace Server
     public enum ServerPackets
     {
         welcome = 1,
-        spawnPlayer,
-        playerPosition,
-        playerRotation
+        spawnPlayer = 2,
+        playerPosition = 3,
+        playerRotation = 4
 
     }
 
@@ -20,7 +20,7 @@ namespace Server
     public enum ClientPackets
     {
         welcomeReceived = 1,
-        playerMovement
+        playerMovement = 2
     }
 
     public class Packet : IDisposable
@@ -398,6 +398,14 @@ namespace Server
         }
 
         private readonly Assembly UNITY_ASSEMBLY = typeof(UnityEngine.Vector3).Assembly;
+
+        public T ReadObject<T>()
+        {
+            Type test = typeof(T);
+            object result = ReadObject();
+            Type resultType = result.GetType();
+            return (T)result;
+        }
 
         public object ReadObject()
         {

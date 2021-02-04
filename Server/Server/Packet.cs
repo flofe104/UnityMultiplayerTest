@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
+using ServerData;
 
 namespace Server
 {
@@ -11,9 +12,9 @@ namespace Server
     public enum ServerPackets
     {
         welcome = 1,
-        spawnPlayer,
-        playerPosition,
-        playerRotation
+        spawnPlayer = 2,
+        playerPosition = 3,
+        playerRotation = 4
 
     }
 
@@ -21,7 +22,7 @@ namespace Server
     public enum ClientPackets
     {
         welcomeReceived = 1,
-        playerMovement
+        playerMovement = 2
     }
 
     public class Packet : IDisposable
@@ -175,15 +176,6 @@ namespace Server
         //    Write(_value.Z);
         //}
 
-        /// <summary>Adds a Quaternion to the packet.</summary>
-        /// <param name="_value">The Quaternion to add.</param>
-        public void Write(Quaternion _value)
-        {
-            Write(_value.X);
-            Write(_value.Y);
-            Write(_value.Z);
-            Write(_value.W);
-        }
 
         public void AddObject<T>(T value, Action<T, Packet> writer)
         {
@@ -408,10 +400,21 @@ namespace Server
             }
         }
 
+        public T ReadObject<T>()
+        {
+            return (T)ReadObject();
+        }
+
+        private readonly Assembly NumericsAssembly = typeof(Vector2).Assembly;
+
         public object ReadObject()
         {
             string s = ReadString();
-            s.Replace("System.Numerics", "UnityEngine");
+            if (s.Contains("UnityEngine"))
+            {
+                s = s.Replace("UnityEngine", "System.Numerics");
+                s += ", " + NumericsAssembly.FullName;
+            }
             Type type = Type.GetType(s);
 
             return Read(type);
@@ -507,7 +510,7 @@ namespace Server
                 parentType = parentType.BaseType;
             } while (parentType != null && parentType != last && (lastInclusive || parentType.BaseType != last));
 
-            return fields.ToArray();
+            return fields.Where(f => f.GetCustomAttribute<ServerOnlyAttribute>() == null).ToArray();
         }
     }
 }
