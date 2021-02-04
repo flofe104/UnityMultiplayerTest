@@ -35,9 +35,9 @@ namespace Server
             {
                 try
                 {
-                    if(socket != null)
+                    if (socket != null)
                     {
-                        stream.BeginWrite(p.ToArray(),0, p.Length(), null, null);
+                        stream.BeginWrite(p.ToArray(), 0, p.Length(), null, null);
                     }
                 }
                 catch (Exception ex)
@@ -74,7 +74,7 @@ namespace Server
                 try
                 {
                     int byteLength = stream.EndRead(result);
-                    if(byteLength > 0)
+                    if (byteLength > 0)
                     {
                         byte[] data = new byte[byteLength];
                         Array.Copy(recieveBuffer, data, byteLength);
@@ -82,11 +82,26 @@ namespace Server
                         recievedData.Reset(HandleData(data));
                         stream.BeginRead(recieveBuffer, 0, dataBufferSize, ReceiveCallBack, null);
                     }
+                    else
+                    {
+                        Server.clients[id].Disconnect();
+                    }
                 }
                 catch (Exception ex)
                 {
+                    Server.clients[id].Disconnect();
                     Console.WriteLine($"Error on recieve callback {ex}");
                 }
+            }
+
+
+            public void Disconnect()
+            {
+                socket.Close();
+                stream = null;
+                recievedData = null;
+                recieveBuffer = null;
+                socket = null;
             }
 
             private bool HandleData(byte[] data)
@@ -110,7 +125,7 @@ namespace Server
                         using (Packet p = new Packet(packetBytes))
                         {
                             int packetId = p.ReadInt();
-                            Server.packetHandlers[packetId](id,p);
+                            Server.packetHandlers[packetId](id, p);
                         }
                     });
 
@@ -149,6 +164,10 @@ namespace Server
             {
                 Server.SendUDPData(endPoint, p);
             }
+            public void Disconnect()
+            {
+                endPoint = null;
+            }
 
             public void HandleData(Packet p)
             {
@@ -157,7 +176,7 @@ namespace Server
 
                 ThreadManager.ExecuteOnMainThread(() =>
                 {
-                    using(Packet p = new Packet(packetBytes))
+                    using (Packet p = new Packet(packetBytes))
                     {
                         int packetId = p.ReadInt();
                         Server.packetHandlers[packetId](id, p);
@@ -176,7 +195,7 @@ namespace Server
 
         }
 
-        private void SpawnOtherPlayers() 
+        private void SpawnOtherPlayers()
         {
             foreach (Client client in Server.clients.Values)
             {
@@ -191,6 +210,7 @@ namespace Server
         }
 
 
+
         private void SpawnPlayerOnOtherClients()
         {
             foreach (Client client in Server.clients.Values)
@@ -200,6 +220,15 @@ namespace Server
                     ServerSend.SpawnPlayer(client.id, player);
                 }
             }
+        }
+
+
+        private void Disconnect()
+        {
+            Console.WriteLine($"{tcp.socket.Client.RemoteEndPoint} has disconnected.");
+            player = null;
+            udp.Disconnect();
+            tcp.Disconnect();
         }
 
     }

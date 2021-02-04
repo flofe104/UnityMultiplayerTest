@@ -38,7 +38,7 @@ namespace ServerData
         private void Move(Vector2 inputMovement)
         {
             Vector3 forward = Vector3.Transform(new Vector3(0,0,1), rotation);
-            Vector3 right = Vector3.Normalize(Vector3.Cross(forward, new Vector3(0, 1, 0)));
+            Vector3 right = Vector3.Normalize(Vector3.Cross(forward, new Vector3(0, -1, 0)));
 
             Vector3 moveDir = right * inputMovement.X + forward * inputMovement.Y;
             position += moveDir * moveSpeed;
@@ -50,7 +50,7 @@ namespace ServerData
         public void SetInput(InputData data)
         {
             input = data;
-            if (input.inputMovement.X > 0 || input.inputMovement.Y > 0)
+            if (input.inputMovement.LengthSquared() > 1)
             {
                 input.inputMovement = Vector2.Normalize(input.inputMovement);
             }

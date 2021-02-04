@@ -18,6 +18,8 @@ public class Client : MonoBehaviour
     public TCP tcp;
     public UDP udp;
 
+    private bool isConnected = false;
+
     private delegate void PacketHandler(Packet p);
     private static Dictionary<int, PacketHandler> packetHandlers;
 
@@ -40,9 +42,26 @@ public class Client : MonoBehaviour
         udp = new UDP();
     }
 
+    private void OnApplicationQuit()
+    {
+        Disconnect();
+    }
+
+    private void Disconnect()
+    {
+        if (isConnected)
+        {
+            isConnected = false;
+            udp.socket.Close();
+            tcp.socket.Close();
+            Debug.Log("Disconnected");
+        }
+    }
+
     public void ConnectToServer()
     {
         InitializeClientData();
+        isConnected = true;
         tcp.Connect();
     }
 
@@ -94,6 +113,15 @@ public class Client : MonoBehaviour
             stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
         }
 
+        private void Disconnect()
+        {
+            instance.Disconnect();
+            stream = null;
+            receiveBuffer = null;
+            recievedData = null;
+            socket = null;
+        }
+
         private void ReceiveCallback(IAsyncResult result)
         {
             try
@@ -101,6 +129,7 @@ public class Client : MonoBehaviour
                 int _byteLength = stream.EndRead(result);
                 if (_byteLength <= 0)
                 {
+                    instance.Disconnect();
                     return;
                 }
                 byte[] data = new byte[_byteLength];
@@ -112,7 +141,7 @@ public class Client : MonoBehaviour
             }
             catch
             {
-
+                Disconnect();
             }
         }
 
@@ -219,14 +248,25 @@ public class Client : MonoBehaviour
                 if (data.Length >= 4)
                 {
                     HandleData(data);
-
+                }
+                else
+                {
+                   instance.Disconnect();
                 }
             }
             catch (Exception ex)
             {
-
+                Disconnect();
             }
         }
+
+        private void Disconnect()
+        {
+            instance.Disconnect();
+            endPoint = null;
+            socket = null;
+        }
+
 
         private void HandleData(byte[] data)
         {
