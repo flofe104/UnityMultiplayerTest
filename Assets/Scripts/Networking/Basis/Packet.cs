@@ -12,7 +12,8 @@ namespace Server
         welcome = 1,
         spawnPlayer = 2,
         playerPosition = 3,
-        playerRotation = 4
+        playerRotation = 4,
+        playerDisconnected
 
     }
 
@@ -401,9 +402,7 @@ namespace Server
 
         public T ReadObject<T>()
         {
-            Type test = typeof(T);
             object result = ReadObject();
-            Type resultType = result.GetType();
             return (T)result;
         }
 
@@ -416,14 +415,13 @@ namespace Server
             if (s.Contains("System.Numerics"))
             {
                 s = s.Replace("System.Numerics", "UnityEngine");
-                type = Type.GetType(s + ", " + UNITY_ASSEMBLY.FullName);
             }
-            else
+            if(s.Contains("UnityEngine"))
             {
-                type = Type.GetType(s);
+                s += ", " + UNITY_ASSEMBLY.FullName;
             }
 
-            return Read(type);
+            return Read(Type.GetType(s));
         }
 
         private object Read(Type type)

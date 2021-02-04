@@ -20,7 +20,7 @@ namespace ServerData
             result.inputMovement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
             result.rotation = transform.rotation;
-            result.jump = Input.GetButtonDown("Jump");
+            result.jump = Input.GetButton("Jump");
 
             return result;
         }

@@ -42,4 +42,12 @@ public class ClientHandle : MonoBehaviour
         Quaternion rot = p.ReadObject<Quaternion>();
         GameManager.players[id].transform.rotation = rot;
     }
+
+    public static void PlayerDisconnected(Packet p)
+    {
+        int id = p.ReadInt();
+
+        Destroy(GameManager.players[id].gameObject);
+        GameManager.players.Remove(id);
+    }
 }

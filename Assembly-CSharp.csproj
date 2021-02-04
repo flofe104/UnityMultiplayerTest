@@ -55,18 +55,18 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio Tools for Unity\16.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\UIManager.cs" />
-    <Compile Include="Assets\Scripts\Packet.cs" />
-    <Compile Include="Assets\Scripts\Client.cs" />
-    <Compile Include="Assets\Scripts\ClientSend.cs" />
-    <Compile Include="Assets\Scripts\ThreadManager.cs" />
-    <Compile Include="Assets\Scripts\ClientHandle.cs" />
-    <Compile Include="Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Scripts\PlayerManager.cs" />
-    <Compile Include="Assets\Scripts\PlayerController.cs" />
-    <Compile Include="Assets\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\ServerData\PlayerData.cs" />
-    <Compile Include="Assets\Scripts\ServerData\InputData.cs" />
+    <Compile Include="Assets\Scripts\Networking\Testing\UIManager.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\ServerData\InputData.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\Packet.cs" />
+    <Compile Include="Assets\Scripts\Networking\Testing\CameraController.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\Client.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\ServerData\PlayerData.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\ClientSend.cs" />
+    <Compile Include="Assets\Scripts\Networking\Testing\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\PlayerManager.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\GameManager.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\ThreadManager.cs" />
+    <Compile Include="Assets\Scripts\Networking\Basis\ClientHandle.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
